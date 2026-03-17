@@ -16,6 +16,7 @@ public partial class Player
     public int? Age { get; set; }
 
     public string? Position { get; set; }
+    public string? PpUrl { get; set; }
 
     public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
 
