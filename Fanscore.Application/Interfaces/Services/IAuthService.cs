@@ -6,5 +6,8 @@ namespace FanScore.Application.Interfaces.Services
     {
         Task<AuthResponseDto> RegisterAsync(RegisterDto dto);
         Task<AuthResponseDto> LoginAsync(LoginDto dto);
+        Task VerifyEmailAsync(string token);
+        Task<MeDto> GetMeAsync(int userId);
+        Task LogoutAsync(int userId);
     }
 }

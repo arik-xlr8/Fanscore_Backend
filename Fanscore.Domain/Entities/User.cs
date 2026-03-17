@@ -22,6 +22,8 @@ public partial class User
     public DateTime? RefreshTokenExpires { get; set; }
 
     public string? EmailVerificationToken { get; set; }
+    public DateTime? EmailVerificationTokenExpires { get; set; }
+    public DateTime? LastVerificationEmailSentAt { get; set; }
 
     public string? Role { get; set; }
 

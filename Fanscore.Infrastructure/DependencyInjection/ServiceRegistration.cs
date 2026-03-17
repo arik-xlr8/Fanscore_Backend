@@ -1,6 +1,5 @@
 using FanScore.Application.Interfaces.Repositories;
 using FanScore.Application.Interfaces.Services;
-using FanScore.Application.Services;
 using FanScore.Infrastructure.Data;
 using FanScore.Infrastructure.Repositories;
 using FanScore.Infrastructure.Services;
