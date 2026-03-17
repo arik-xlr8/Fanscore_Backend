@@ -1,0 +1,77 @@
+# ========================
+# BUILD OUTPUTS
+# ========================
+bin/
+obj/
+out/
+
+# ========================
+# USER / IDE FILES
+# ========================
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+
+# ========================
+# LOGS
+# ========================
+*.log
+
+# ========================
+# ENV / SECRETS
+# ========================
+appsettings.Development.json
+appsettings.*.json
+
+# Ama production config'i ignore etme!
+!appsettings.json
+
+# ========================
+# NUGET
+# ========================
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# ========================
+# ENTITY FRAMEWORK
+# ========================
+Migrations/
+
+# ========================
+# OS FILES
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# TEMP FILES
+# ========================
+*.tmp
+*.temp
+
+# ========================
+# DOTNET
+# ========================
+*.dll
+*.exe
+*.pdb
+
+# ========================
+# JWT / KEYS (opsiyonel)
+# ========================
+*.key
+*.pem
+
+# ========================
+# NODE (Eğer frontend aynı repo'da ise)
+# ========================
+node_modules/
+dist/
