@@ -15,16 +15,16 @@ namespace FanScore.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPlayers()
+        public async Task<IActionResult> GetAllPlayers([FromQuery] string? periodType)
         {
-            var players = await _playerService.GetAllPlayersAsync();
+            var players = await _playerService.GetAllPlayersAsync(periodType);
             return Ok(players);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPlayerById(int id)
+        public async Task<IActionResult> GetPlayerById(int id, [FromQuery] string? periodType)
         {
-            var player = await _playerService.GetPlayerByIdAsync(id);
+            var player = await _playerService.GetPlayerByIdAsync(id, periodType);
 
             if (player == null)
                 return NotFound(new { message = "Oyuncu bulunamadı." });

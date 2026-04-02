@@ -8,7 +8,7 @@ namespace FanScore.Application.Interfaces.Services
 {
     public interface IPlayerService
     {
-        Task<List<PlayerDto>> GetAllPlayersAsync();
-        Task<PlayerDto?> GetPlayerByIdAsync(int playerId);
+        Task<List<PlayerDto>> GetAllPlayersAsync(string? periodType);
+        Task<PlayerDto?> GetPlayerByIdAsync(int playerId, string? periodType);
     }
 }

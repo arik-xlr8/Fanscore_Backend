@@ -152,13 +152,11 @@ public partial class AppDbContext : DbContext
                 .HasCharSet("utf8mb3")
                 .UseCollation("utf8mb3_general_ci");
 
-            entity.HasIndex(e => new { e.PlayerId, e.PeriodType, e.BucketStart }, "idx_rating_bucket");
 
             entity.HasIndex(e => e.PlayerId, "idx_rating_player");
 
             entity.HasIndex(e => e.UserId, "idx_rating_user");
 
-            entity.HasIndex(e => new { e.UserId, e.PlayerId, e.PeriodType, e.BucketStart }, "uq_rating_once").IsUnique();
 
             entity.Property(e => e.RatingId).HasColumnName("RatingID");
             entity.Property(e => e.Comment).HasMaxLength(500);
@@ -166,6 +164,7 @@ public partial class AppDbContext : DbContext
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.PeriodType).HasMaxLength(20);
+            entity.Property(e => e.ExpiresAt).HasColumnType("datetime");
             entity.Property(e => e.PlayerId).HasColumnName("PlayerID");
             entity.Property(e => e.RatingValue).HasPrecision(3, 1);
             entity.Property(e => e.UserId).HasColumnName("UserID");

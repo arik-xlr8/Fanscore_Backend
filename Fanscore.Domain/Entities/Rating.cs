@@ -19,7 +19,7 @@ public partial class Rating
 
     public string PeriodType { get; set; } = null!;
 
-    public DateOnly BucketStart { get; set; }
+    public DateTime ExpiresAt { get; set; }
 
     public virtual Player Player { get; set; } = null!;
 
