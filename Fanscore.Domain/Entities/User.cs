@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Fanscore.Domain.Entities;
 
 namespace FanScore.Domain.Entities;
 
@@ -48,4 +49,6 @@ public partial class User
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 
     public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+
+    public virtual ICollection<RatingReaction> RatingReactions { get; set; } = new List<RatingReaction>();
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Fanscore.Domain.Entities;
 using FanScore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<Rating> Ratings { get; set; }
+
+    public virtual DbSet<RatingReaction> RatingReactions { get; set; }
 
     public virtual DbSet<Team> Teams { get; set; }
 
@@ -231,6 +234,35 @@ public partial class AppDbContext : DbContext
                 .HasDefaultValueSql("'user'");
             entity.Property(e => e.Surname).HasMaxLength(50);
             entity.Property(e => e.UserName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<RatingReaction>(entity =>
+        {
+            entity.HasKey(e => e.RatingReactionId).HasName("PRIMARY");
+
+            entity.ToTable("RatingReaction");
+
+            entity.HasIndex(e => new { e.RatingId, e.UserId }, "uq_rating_user").IsUnique();
+
+            entity.Property(e => e.RatingReactionId).HasColumnName("RatingReactionId");
+            entity.Property(e => e.RatingId).HasColumnName("RatingId");
+            entity.Property(e => e.UserId).HasColumnName("UserId");
+            entity.Property(e => e.ReactionType).HasMaxLength(10);
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("current_timestamp()");
+
+            entity.HasOne(d => d.Rating)
+                .WithMany(p => p.RatingReactions)
+                .HasForeignKey(d => d.RatingId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_ratingreaction_rating");
+
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.RatingReactions)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_ratingreaction_user");
         });
 
         OnModelCreatingPartial(modelBuilder);
