@@ -106,7 +106,9 @@ namespace FanScore.Infrastructure.Services
                 select new PlayerCommentDto
                 {
                     RatingId = r.RatingId,
-                    UserName = ((u.Name ?? "") + " " + (u.Surname ?? "")).Trim(),
+                    UserName = !string.IsNullOrWhiteSpace(u.UserName)
+                    ? u.UserName
+                    : "anon",
                     Comment = r.Comment!,
                     LikeCount = r.LikeCount,
                     DislikeCount = r.DislikeCount,
