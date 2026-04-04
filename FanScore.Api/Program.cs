@@ -6,6 +6,8 @@ using Microsoft.OpenApi.Models;
 using FanScore.Application.Interfaces.Services;
 using FanScore.Infrastructure.Services;
 using Fanscore.Application.Interfaces.Services;
+using FanScore.Application.Services;
+using FanScore.Application.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,6 +86,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
 
 builder.Services.AddAuthorization();
 
