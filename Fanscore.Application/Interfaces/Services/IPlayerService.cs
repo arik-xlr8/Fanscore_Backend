@@ -10,5 +10,7 @@ namespace FanScore.Application.Interfaces.Services
     {
         Task<List<PlayerDto>> GetAllPlayersAsync(string? periodType);
         Task<PlayerDto?> GetPlayerByIdAsync(int playerId, string? periodType);
+        Task<List<PlayerDto>> GetShuffledPlayersAsync(string? periodType);
+        Task<List<PlayerDto>> SearchPlayersAsync(string? searchTerm, string? periodType);
     }
 }

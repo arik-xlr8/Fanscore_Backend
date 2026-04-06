@@ -31,5 +31,19 @@ namespace FanScore.Api.Controllers
 
             return Ok(player);
         }
+
+        [HttpGet("shuffle")]
+        public async Task<IActionResult> GetShuffledPlayers([FromQuery] string? periodType)
+        {
+            var players = await _playerService.GetShuffledPlayersAsync(periodType);
+            return Ok(players);
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchPlayers([FromQuery] string? searchTerm, [FromQuery] string? periodType)
+        {
+            var players = await _playerService.SearchPlayersAsync(searchTerm, periodType);
+            return Ok(players);
+        }
     }
 }
