@@ -8,6 +8,8 @@ using FanScore.Infrastructure.Services;
 using Fanscore.Application.Interfaces.Services;
 using FanScore.Application.Services;
 using FanScore.Application.Interfaces;
+using FanScore.Api.Services.Concrete;
+using FanScore.Api.Services.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,6 +89,7 @@ builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddAuthorization();
 

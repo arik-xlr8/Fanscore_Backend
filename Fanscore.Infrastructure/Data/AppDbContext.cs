@@ -31,6 +31,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Team> Teams { get; set; }
 
+    public virtual DbSet<City> Cities { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
 //     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -66,6 +68,23 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Halisahas)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("fk_halisaha_user");
+        });
+
+        modelBuilder.Entity<City>(entity =>
+        {
+            entity.HasKey(e => e.CityId).HasName("PRIMARY");
+
+            entity.ToTable("City");
+
+            entity.HasIndex(e => e.CityName, "UK_City_CityName").IsUnique();
+
+            entity.HasIndex(e => e.PlateCode, "UK_City_PlateCode").IsUnique();
+
+            entity.Property(e => e.CityId).HasColumnName("CityID");
+            entity.Property(e => e.PlateCode).HasColumnName("PlateCode");
+            entity.Property(e => e.CityName)
+                .HasMaxLength(50)
+                .HasColumnName("CityName");
         });
 
         modelBuilder.Entity<Pic>(entity =>
@@ -123,27 +142,54 @@ public partial class AppDbContext : DbContext
                 .UseCollation("utf8mb3_general_ci");
 
             entity.HasIndex(e => e.PicId, "idx_product_pic");
-
             entity.HasIndex(e => e.UserId, "idx_product_user");
+            entity.HasIndex(e => e.TeamId, "idx_product_team");
+            entity.HasIndex(e => e.CityId, "idx_product_city");
+            entity.HasIndex(e => e.Condition, "idx_product_condition");
+            entity.HasIndex(e => e.ListedAt, "idx_product_listedat");
+            entity.HasIndex(e => e.Price, "idx_product_price");
 
             entity.Property(e => e.ProductId).HasColumnName("ProductID");
+            entity.Property(e => e.Name).HasMaxLength(120);
+            entity.Property(e => e.ShortDescription)
+                .HasMaxLength(255)
+                .HasColumnName("ShortDescription");
             entity.Property(e => e.Description).HasColumnType("text");
+            entity.Property(e => e.Price).HasPrecision(10, 2);
             entity.Property(e => e.ListedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
-            entity.Property(e => e.Name).HasMaxLength(120);
-            entity.Property(e => e.PicId).HasColumnName("PicID");
-            entity.Property(e => e.Price).HasPrecision(10, 2);
             entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.PicId).HasColumnName("PicID");
+            entity.Property(e => e.TeamId).HasColumnName("TeamID");
+            entity.Property(e => e.CityId).HasColumnName("CityID");
+            entity.Property(e => e.Condition)
+                .HasColumnName("Condition")
+                .HasColumnType("enum('Sifir','AzKullanilmis','Iyi','Orta','Yipranmis')")
+                .HasDefaultValueSql("'Iyi'");
 
-            entity.HasOne(d => d.Pic).WithMany(p => p.Products)
+            entity.HasOne(d => d.Pic)
+                .WithMany(p => p.Products)
                 .HasForeignKey(d => d.PicId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_product_pic");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Products)
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Products)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("fk_product_user");
+
+            entity.HasOne(d => d.Team)
+                .WithMany(p => p.Products)
+                .HasForeignKey(d => d.TeamId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Product_Team");
+
+            entity.HasOne(d => d.City)
+                .WithMany(p => p.Products)
+                .HasForeignKey(d => d.CityId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Product_City");
         });
 
         modelBuilder.Entity<Rating>(entity =>

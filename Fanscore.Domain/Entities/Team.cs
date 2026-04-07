@@ -12,4 +12,5 @@ public partial class Team
     public string? PpUrl { get; set; }
 
     public virtual ICollection<Player> Players { get; set; } = new List<Player>();
+    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }
