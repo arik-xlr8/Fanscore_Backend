@@ -19,6 +19,7 @@ namespace Fanscore.Application.DTOs.Product
         public int UserId { get; set; }
         public string? UserName { get; set; }
         public string? UserProfilePic { get; set; }
+        public string? PhoneNumber { get; set; }
 
         public int? TeamId { get; set; }
         public string? TeamName { get; set; }

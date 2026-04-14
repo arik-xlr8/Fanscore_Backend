@@ -44,6 +44,8 @@ public partial class User
 
     public DateTime? PasswordResetTokenExpires { get; set; }
 
+    public string? PhoneNumber { get; set; }
+
     public virtual ICollection<Halisaha> Halisahas { get; set; } = new List<Halisaha>();
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();

@@ -15,6 +15,10 @@ public partial class Halisaha
 
     public string City { get; set; } = null!;
 
+    public decimal Price { get; set; }
+
+    public int TeamSize { get; set; }
+
     public int UserId { get; set; }
 
     public virtual User User { get; set; } = null!;

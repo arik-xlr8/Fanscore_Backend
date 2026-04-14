@@ -65,6 +65,7 @@ namespace FanScore.Api.Services.Concrete
                     UserId = p.UserId,
                     UserName = p.User.UserName,
                     UserProfilePic = p.User.ProfilePic,
+                    PhoneNumber = p.User.PhoneNumber,
 
                     TeamId = p.TeamId,
                     TeamName = p.Team != null ? p.Team.TeamName : null,

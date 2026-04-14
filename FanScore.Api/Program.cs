@@ -90,6 +90,7 @@ builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ITournamentService, TournamentService>();
 
 builder.Services.AddAuthorization();
 
