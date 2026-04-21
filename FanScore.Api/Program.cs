@@ -1,15 +1,15 @@
 using System.Text;
+using FanScore.Api.Services.Abstract;
+using FanScore.Api.Services.Concrete;
+using FanScore.Application.Interfaces;
+using FanScore.Application.Interfaces.Services;
+using FanScore.Application.Services;
 using FanScore.Infrastructure.DependencyInjection;
+using FanScore.Infrastructure.Services;
+using Fanscore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using FanScore.Application.Interfaces.Services;
-using FanScore.Infrastructure.Services;
-using Fanscore.Application.Interfaces.Services;
-using FanScore.Application.Services;
-using FanScore.Application.Interfaces;
-using FanScore.Api.Services.Concrete;
-using FanScore.Api.Services.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,11 +52,29 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Infrastructure registration
+// Infrastructure
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// JWT Authentication
-var jwtKey = builder.Configuration["Jwt:Key"];
+// App services
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPlayerService, PlayerService>();
+builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ITournamentService, TournamentService>();
+
+// JWT
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Key bulunamadı.");
+
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+    ?? throw new InvalidOperationException("Jwt:Issuer bulunamadı.");
+
+var jwtAudience = builder.Configuration["Jwt:Audience"]
+    ?? throw new InvalidOperationException("Jwt:Audience bulunamadı.");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -67,33 +85,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtKey!)
-            ),
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
             ClockSkew = TimeSpan.Zero
         };
     });
 
-    builder.Services.AddControllers();
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<IEmailService, SendGridEmailService>();
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IEmailService, SendGridEmailService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IPlayerService, PlayerService>();
-builder.Services.AddScoped<IRatingService, RatingService>();
-builder.Services.AddScoped<IProfileService, ProfileService>();
-builder.Services.AddScoped<ITeamService, TeamService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<ITournamentService, TournamentService>();
-
 builder.Services.AddAuthorization();
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -106,13 +107,17 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseCors("AllowAngular");
 app.UseStaticFiles();
 
-app.UseSwagger();
-app.UseSwaggerUI();
-
-app.UseHttpsRedirection();
+// Local testte şimdilik kapat
+// app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();

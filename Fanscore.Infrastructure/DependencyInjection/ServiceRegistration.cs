@@ -17,11 +17,12 @@ namespace FanScore.Infrastructure.DependencyInjection
                 ?? throw new InvalidOperationException("DefaultConnection bulunamadı.");
 
             services.AddDbContext<AppDbContext>(options =>
-                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+                options.UseMySql(
+                    connectionString,
+                    new MySqlServerVersion(new Version(8, 0, 36))
+                ));
 
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IJwtService, JwtService>();
-            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }
