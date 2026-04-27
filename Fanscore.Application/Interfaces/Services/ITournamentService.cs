@@ -14,5 +14,6 @@ namespace Fanscore.Application.Interfaces.Services
         Task<TournamentDetailDto> CreateAsync(int userId, TournamentCreateDto dto);
         Task<bool> UpdateAsync(int id, int userId, TournamentUpdateDto dto);
         Task<bool> DeleteAsync(int id, int userId);
+        Task<List<TournamentListDto>> GetByUserIdAsync(int userId);
     }
 }

@@ -1,7 +1,6 @@
 using Fanscore.Application.DTOs.Tournament;
 using Fanscore.Application.DTOs.Tournement;
 using Fanscore.Application.Interfaces.Services;
-using FanScore.Api.Services.Abstract;
 using FanScore.Domain.Entities;
 using FanScore.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -26,12 +25,35 @@ namespace FanScore.Api.Services.Concrete
                     HaliSahaId = x.HaliSahaId,
                     Name = x.Name,
                     Description = x.Description,
-                    City = x.City,
-                    CreatedAt = x.CreatedAt,
 
+                    CityId = x.CityId,
+                    CityName = x.City.CityName,
+
+                    CreatedAt = x.CreatedAt,
                     Price = x.Price,
                     TeamSize = x.TeamSize,
 
+                    UserId = x.UserId,
+                    UserName = x.User.UserName
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<TournamentListDto>> GetByUserIdAsync(int userId)
+        {
+            return await _context.Halisahas
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.CreatedAt)
+                .Select(x => new TournamentListDto
+                {
+                    HaliSahaId = x.HaliSahaId,
+                    Name = x.Name,
+                    Description = x.Description,
+                    CityId = x.CityId,
+                    CityName = x.City.CityName,
+                    CreatedAt = x.CreatedAt,
+                    Price = x.Price,
+                    TeamSize = x.TeamSize,
                     UserId = x.UserId,
                     UserName = x.User.UserName
                 })
@@ -47,9 +69,11 @@ namespace FanScore.Api.Services.Concrete
                     HaliSahaId = x.HaliSahaId,
                     Name = x.Name,
                     Description = x.Description,
-                    City = x.City,
-                    CreatedAt = x.CreatedAt,
 
+                    CityId = x.CityId,
+                    CityName = x.City.CityName,
+
+                    CreatedAt = x.CreatedAt,
                     Price = x.Price,
                     TeamSize = x.TeamSize,
 
@@ -63,11 +87,18 @@ namespace FanScore.Api.Services.Concrete
 
         public async Task<TournamentDetailDto> CreateAsync(int userId, TournamentCreateDto dto)
         {
+            var cityExists = await _context.Cities.AnyAsync(x => x.CityId == dto.CityId);
+
+            if (!cityExists)
+                throw new Exception("Geçersiz şehir seçildi.");
+
             var hali = new Halisaha
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                City = dto.City,
+
+                CityId = dto.CityId,
+
                 CreatedAt = DateTime.UtcNow,
                 UserId = userId,
                 Price = dto.Price,
@@ -77,12 +108,14 @@ namespace FanScore.Api.Services.Concrete
             _context.Halisahas.Add(hali);
             await _context.SaveChangesAsync();
 
-            return await GetByIdAsync(hali.HaliSahaId) ?? throw new Exception("Oluşturulamadı");
+            return await GetByIdAsync(hali.HaliSahaId)
+                ?? throw new Exception("Oluşturulamadı");
         }
 
         public async Task<bool> UpdateAsync(int id, int userId, TournamentUpdateDto dto)
         {
-            var hali = await _context.Halisahas.FirstOrDefaultAsync(x => x.HaliSahaId == id);
+            var hali = await _context.Halisahas
+                .FirstOrDefaultAsync(x => x.HaliSahaId == id);
 
             if (hali == null)
                 return false;
@@ -90,9 +123,16 @@ namespace FanScore.Api.Services.Concrete
             if (hali.UserId != userId)
                 throw new Exception("Yetkin yok");
 
+            var cityExists = await _context.Cities.AnyAsync(x => x.CityId == dto.CityId);
+
+            if (!cityExists)
+                throw new Exception("Geçersiz şehir seçildi.");
+
             hali.Name = dto.Name;
             hali.Description = dto.Description;
-            hali.City = dto.City;
+
+            hali.CityId = dto.CityId;
+
             hali.Price = dto.Price;
             hali.TeamSize = dto.TeamSize;
 
@@ -102,7 +142,8 @@ namespace FanScore.Api.Services.Concrete
 
         public async Task<bool> DeleteAsync(int id, int userId)
         {
-            var hali = await _context.Halisahas.FirstOrDefaultAsync(x => x.HaliSahaId == id);
+            var hali = await _context.Halisahas
+                .FirstOrDefaultAsync(x => x.HaliSahaId == id);
 
             if (hali == null)
                 return false;
@@ -115,5 +156,6 @@ namespace FanScore.Api.Services.Concrete
 
             return true;
         }
+        
     }
 }

@@ -9,7 +9,8 @@ namespace Fanscore.Application.DTOs.Tournament
     {
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
-        public string City { get; set; } = null!;
+
+        public int CityId { get; set; }
 
         public decimal Price { get; set; }
         public int TeamSize { get; set; }

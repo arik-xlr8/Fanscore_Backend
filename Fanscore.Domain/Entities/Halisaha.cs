@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Fanscore.Domain.Entities;
 
 namespace FanScore.Domain.Entities;
 
@@ -13,8 +14,6 @@ public partial class Halisaha
 
     public DateTime CreatedAt { get; set; }
 
-    public string City { get; set; } = null!;
-
     public decimal Price { get; set; }
 
     public int TeamSize { get; set; }
@@ -22,4 +21,8 @@ public partial class Halisaha
     public int UserId { get; set; }
 
     public virtual User User { get; set; } = null!;
+
+    public int CityId { get; set; }
+    
+    public virtual City City { get; set; } = null!;
 }

@@ -55,19 +55,28 @@ public partial class AppDbContext : DbContext
                 .UseCollation("utf8mb3_general_ci");
 
             entity.HasIndex(e => e.UserId, "idx_halisaha_user");
+            entity.HasIndex(e => e.CityId, "idx_halisaha_city");
 
             entity.Property(e => e.HaliSahaId).HasColumnName("HaliSahaID");
-            entity.Property(e => e.City).HasMaxLength(80);
+            entity.Property(e => e.CityId).HasColumnName("CityID");
+
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
+
             entity.Property(e => e.Description).HasColumnType("text");
             entity.Property(e => e.Name).HasMaxLength(120);
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Halisahas)
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Halisahas)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("fk_halisaha_user");
+
+            entity.HasOne(d => d.City)
+                .WithMany()
+                .HasForeignKey(d => d.CityId)
+                .HasConstraintName("fk_halisaha_city");
         });
 
         modelBuilder.Entity<City>(entity =>

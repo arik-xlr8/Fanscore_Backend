@@ -52,6 +52,21 @@ public class TournamentController : ControllerBase
         return Ok(new { message = "Güncellendi" });
     }
 
+    // TournamentController
+    [Authorize]
+    [HttpGet("my-tournaments")]
+    public async Task<IActionResult> GetMyTournaments()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            return Unauthorized(new { message = "Kullanıcı bilgisi alınamadı." });
+
+        var userId = int.Parse(userIdClaim);
+        var result = await _service.GetByUserIdAsync(userId);
+
+        return Ok(result);
+    }
+
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
