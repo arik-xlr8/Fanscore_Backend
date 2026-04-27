@@ -38,6 +38,10 @@ namespace FanScore.Infrastructure.Services
 
             var verificationToken = GenerateVerificationToken();
 
+            var backendBaseUrl = _configuration["App:BackendBaseUrl"];
+
+            var defaultPp = $"{backendBaseUrl}/uploads/profile-pics/default_user.png";
+
             var user = new User
             {
                 Email = dto.Email,
@@ -50,13 +54,14 @@ namespace FanScore.Infrastructure.Services
                 CreatedAt = DateTime.UtcNow,
                 Role = "user",
                 Name = null,
-                Surname = null
+                Surname = null,
+
+                ProfilePic = defaultPp   // 👈 BU SATIR
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            var backendBaseUrl = _configuration["App:BackendBaseUrl"];
             if (string.IsNullOrWhiteSpace(backendBaseUrl))
                 throw new Exception("App:BackendBaseUrl bulunamadı.");
 
