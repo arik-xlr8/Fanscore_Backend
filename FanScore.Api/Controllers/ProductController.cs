@@ -11,10 +11,17 @@ namespace FanScore.Api.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IWebHostEnvironment _env;
+        private readonly IConfiguration _configuration;
 
-        public ProductController(IProductService productService)
+        public ProductController(
+            IProductService productService,
+            IWebHostEnvironment env,
+            IConfiguration configuration)
         {
             _productService = productService;
+            _env = env;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -37,17 +44,51 @@ namespace FanScore.Api.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ProductCreateDto dto)
+        public async Task<IActionResult> Create([FromForm] ProductCreateRequest request)
         {
             try
             {
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
                 if (string.IsNullOrEmpty(userIdClaim))
                     return Unauthorized(new { message = "Kullanıcı bilgisi alınamadı." });
 
                 int userId = int.Parse(userIdClaim);
 
-                var createdProduct = await _productService.CreateAsync(userId, dto);
+                var dto = new ProductCreateDto
+                {
+                    Name = request.Name,
+                    ShortDescription = request.ShortDescription,
+                    Description = request.Description,
+                    Price = request.Price,
+                    TeamId = request.TeamId,
+                    CityId = request.CityId,
+                    Condition = request.Condition
+                };
+
+                var photos = request.Pictures?
+                    .Where(file => file.Length > 0)
+                    .Select(file => new ProductPhotoUploadDto
+                    {
+                        FileStream = file.OpenReadStream(),
+                        OriginalFileName = file.FileName
+                    })
+                    .ToList();
+
+                var webRootPath = _env.WebRootPath;
+
+                if (string.IsNullOrWhiteSpace(webRootPath))
+                    webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+                var baseUrl = _configuration["App:BackendBaseUrl"] ?? $"{Request.Scheme}://{Request.Host}";
+
+                var createdProduct = await _productService.CreateAsync(
+                    userId,
+                    dto,
+                    photos,
+                    webRootPath,
+                    baseUrl
+                );
 
                 return CreatedAtAction(nameof(GetById), new { id = createdProduct.ProductId }, createdProduct);
             }
@@ -59,7 +100,7 @@ namespace FanScore.Api.Controllers
 
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ProductUpdateDto dto)
+        public async Task<IActionResult> Update(int id, [FromForm] ProductUpdateRequest request)
         {
             try
             {
@@ -69,7 +110,41 @@ namespace FanScore.Api.Controllers
 
                 int userId = int.Parse(userIdClaim);
 
-                var updated = await _productService.UpdateAsync(id, userId, dto);
+                var dto = new ProductUpdateDto
+                {
+                    Name = request.Name,
+                    ShortDescription = request.ShortDescription,
+                    Description = request.Description,
+                    Price = request.Price,
+                    TeamId = request.TeamId,
+                    CityId = request.CityId,
+                    Condition = request.Condition
+                };
+
+                var photos = request.Pictures?
+                    .Where(file => file.Length > 0)
+                    .Select(file => new ProductPhotoUploadDto
+                    {
+                        FileStream = file.OpenReadStream(),
+                        OriginalFileName = file.FileName
+                    })
+                    .ToList();
+
+                var webRootPath = _env.WebRootPath;
+                if (string.IsNullOrWhiteSpace(webRootPath))
+                    webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+                var baseUrl = _configuration["App:BackendBaseUrl"] ?? $"{Request.Scheme}://{Request.Host}";
+
+                var updated = await _productService.UpdateAsync(
+                    id,
+                    userId,
+                    dto,
+                    photos,
+                    request.ReplacePhotos,
+                    webRootPath,
+                    baseUrl
+                );
 
                 if (!updated)
                     return NotFound(new { message = "Ürün bulunamadı." });
@@ -81,7 +156,6 @@ namespace FanScore.Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
@@ -89,6 +163,7 @@ namespace FanScore.Api.Controllers
             try
             {
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
                 if (string.IsNullOrEmpty(userIdClaim))
                     return Unauthorized(new { message = "Kullanıcı bilgisi alınamadı." });
 
@@ -106,5 +181,53 @@ namespace FanScore.Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [Authorize]
+        [HttpGet("my-products")]
+        public async Task<IActionResult> GetMyProducts()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized(new { message = "Kullanıcı bilgisi alınamadı." });
+
+            int userId = int.Parse(userIdClaim);
+
+            var products = await _productService.GetByUserIdAsync(userId);
+
+            return Ok(products);
+        }
+    }
+
+    public class ProductCreateRequest
+    {
+        public string Name { get; set; } = null!;
+        public string? ShortDescription { get; set; }
+        public string? Description { get; set; }
+        public decimal Price { get; set; }
+
+        public int? TeamId { get; set; }
+        public int CityId { get; set; }
+
+        public string Condition { get; set; } = "Iyi";
+
+        public List<IFormFile>? Pictures { get; set; }
+    }
+
+    public class ProductUpdateRequest
+    {
+        public string Name { get; set; } = null!;
+        public string? ShortDescription { get; set; }
+        public string? Description { get; set; }
+        public decimal Price { get; set; }
+
+        public int? TeamId { get; set; }
+        public int CityId { get; set; }
+
+        public string Condition { get; set; } = "Iyi";
+
+        public bool ReplacePhotos { get; set; } = false;
+
+        public List<IFormFile>? Pictures { get; set; }
     }
 }

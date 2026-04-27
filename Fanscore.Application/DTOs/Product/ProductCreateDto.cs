@@ -17,6 +17,6 @@ namespace Fanscore.Application.DTOs.Product
 
         public string Condition { get; set; } = "Iyi";
 
-        public List<string>? PictureUrls { get; set; }
+
     }
 }
