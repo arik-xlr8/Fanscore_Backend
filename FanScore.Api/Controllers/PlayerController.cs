@@ -45,5 +45,43 @@ namespace FanScore.Api.Controllers
             var players = await _playerService.SearchPlayersAsync(searchTerm, periodType);
             return Ok(players);
         }
+
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetAllPlayersPaged(
+            [FromQuery] string? periodType,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 100)
+        {
+            var result = await _playerService.GetAllPlayersPagedAsync(periodType, page, pageSize);
+            return Ok(result);
+        }
+
+        [HttpGet("search-paged")]
+        public async Task<IActionResult> SearchPlayersPaged(
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? periodType,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 100)
+        {
+            var result = await _playerService.SearchPlayersPagedAsync(searchTerm, periodType, page, pageSize);
+            return Ok(result);
+        }
+
+        [HttpGet("shuffle-paged")]
+        public async Task<IActionResult> GetShuffledPlayersPaged(
+            [FromQuery] string? periodType,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 100,
+            [FromQuery] int shuffleSeed = 1)
+        {
+            var result = await _playerService.GetShuffledPlayersPagedAsync(
+                periodType,
+                page,
+                pageSize,
+                shuffleSeed
+            );
+
+            return Ok(result);
+        }
     }
 }
