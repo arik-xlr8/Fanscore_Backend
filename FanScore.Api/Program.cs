@@ -68,6 +68,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ITournamentService, TournamentService>();
 builder.Services.AddScoped<ICityService, CityService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IFriendshipService, FriendshipService>();
 
 // JWT
 var jwtKey = builder.Configuration["Jwt:Key"]

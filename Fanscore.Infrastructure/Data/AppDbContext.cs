@@ -35,6 +35,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<Friendship> Friendships { get; set; }
+
 //     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 // #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
 //         => optionsBuilder.UseMySql("server=localhost;port=3306;database=fanscore_db;user=root;password=Benkomando123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.41-mysql"));
@@ -289,6 +291,49 @@ public partial class AppDbContext : DbContext
                 .HasDefaultValueSql("'user'");
             entity.Property(e => e.Surname).HasMaxLength(50);
             entity.Property(e => e.UserName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Friendship>(entity =>
+        {
+            entity.HasKey(e => e.FriendshipId).HasName("PRIMARY");
+
+            entity
+                .ToTable("friendship")
+                .HasCharSet("utf8mb3")
+                .UseCollation("utf8mb3_general_ci");
+
+            entity.HasIndex(e => new { e.UserId, e.FriendUserId }, "uq_friendship_pair").IsUnique();
+            entity.HasIndex(e => e.FriendUserId, "idx_friendship_friend");
+
+            entity.Property(e => e.FriendshipId).HasColumnName("FriendshipID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.FriendUserId).HasColumnName("FriendUserID");
+            entity.Property(e => e.RequestedByUserId).HasColumnName("RequestedByUserID");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("'Pending'");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("datetime");
+            entity.Property(e => e.RespondedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_friendship_user");
+
+            entity.HasOne(d => d.FriendUser)
+                .WithMany()
+                .HasForeignKey(d => d.FriendUserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_friendship_friend_user");
+
+            entity.HasOne(d => d.RequestedByUser)
+                .WithMany()
+                .HasForeignKey(d => d.RequestedByUserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_friendship_requested_by");
         });
 
         modelBuilder.Entity<RatingReaction>(entity =>
