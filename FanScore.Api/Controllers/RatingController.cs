@@ -27,6 +27,10 @@ namespace FanScore.Api.Controllers
                 var result = await _ratingService.CreateRatingAsync(userId, dto);
                 return Ok(result);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
             catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
@@ -39,6 +43,10 @@ namespace FanScore.Api.Controllers
             {
                 return Conflict(new { message = ex.Message });
             }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Oy gönderilirken beklenmeyen bir hata oluştu." });
+            }
         }
 
         [HttpGet("can-vote")]
@@ -50,25 +58,18 @@ namespace FanScore.Api.Controllers
                 var result = await _ratingService.CheckVoteAvailabilityAsync(userId, playerId, periodType);
                 return Ok(result);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
             catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-
-        private int GetUserIdFromClaims()
-        {
-            var userIdClaim =
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
-                User.FindFirst("nameid")?.Value ??
-                User.FindFirst("sub")?.Value ??
-                User.FindFirst("userId")?.Value;
-
-            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
-                throw new UnauthorizedAccessException("Token içinden kullanıcı bilgisi alınamadı.");
-
-            return userId;
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Oy hakkı kontrol edilirken beklenmeyen bir hata oluştu." });
+            }
         }
 
         [AllowAnonymous]
@@ -84,6 +85,10 @@ namespace FanScore.Api.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Yorumlar getirilirken beklenmeyen bir hata oluştu." });
+            }
         }
 
         [HttpPost("{ratingId}/like")]
@@ -95,6 +100,10 @@ namespace FanScore.Api.Controllers
                 var result = await _ratingService.LikeCommentAsync(userId, ratingId);
                 return Ok(result);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
             catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
@@ -102,6 +111,10 @@ namespace FanScore.Api.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Beğeni işlemi yapılırken beklenmeyen bir hata oluştu." });
             }
         }
 
@@ -114,6 +127,10 @@ namespace FanScore.Api.Controllers
                 var result = await _ratingService.DislikeCommentAsync(userId, ratingId);
                 return Ok(result);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
             catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
@@ -122,6 +139,26 @@ namespace FanScore.Api.Controllers
             {
                 return NotFound(new { message = ex.Message });
             }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Dislike işlemi yapılırken beklenmeyen bir hata oluştu." });
+            }
+        }
+
+        private int GetUserIdFromClaims()
+        {
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                User.FindFirst("nameid")?.Value ??
+                User.FindFirst("sub")?.Value ??
+                User.FindFirst("userId")?.Value;
+
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                throw new UnauthorizedAccessException("Giriş yapmadınız. Lütfen tekrar giriş yapın.");
+            }
+
+            return userId;
         }
     }
 }
