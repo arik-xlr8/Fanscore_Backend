@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Fanscore.Application.DTOs.Player;
+using FanScore.Application.DTOs.Admin;
 using FanScore.Application.DTOs.Player;
 
 namespace FanScore.Application.Interfaces.Services
@@ -20,6 +21,9 @@ namespace FanScore.Application.Interfaces.Services
             int page,
             int pageSize,
             int shuffleSeed
-        );    
+        );
+        Task<PlayerDto> CreatePlayerAsync(AdminCreatePlayerDto dto);
+        Task<PlayerDto?> UpdatePlayerAsync(int playerId, AdminUpdatePlayerDto dto);
+        Task<bool> DeletePlayerAsync(int playerId);
     }
 }

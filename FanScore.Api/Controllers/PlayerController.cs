@@ -1,4 +1,6 @@
+using FanScore.Application.DTOs.Admin;
 using FanScore.Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FanScore.Api.Controllers
@@ -82,6 +84,50 @@ namespace FanScore.Api.Controllers
             );
 
             return Ok(result);
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        public async Task<IActionResult> CreatePlayer(AdminCreatePlayerDto dto)
+        {
+            try
+            {
+                var created = await _playerService.CreatePlayerAsync(dto);
+                return CreatedAtAction(nameof(GetPlayerById), new { id = created.PlayerId }, created);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdatePlayer(int id, AdminUpdatePlayerDto dto)
+        {
+            try
+            {
+                var updated = await _playerService.UpdatePlayerAsync(id, dto);
+                if (updated == null)
+                    return NotFound(new { message = "Oyuncu bulunamadi." });
+
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePlayer(int id)
+        {
+            var deleted = await _playerService.DeletePlayerAsync(id);
+            if (!deleted)
+                return NotFound(new { message = "Oyuncu bulunamadi." });
+
+            return Ok(new { message = "Oyuncu silindi." });
         }
     }
 }

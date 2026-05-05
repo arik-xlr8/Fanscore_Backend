@@ -1,6 +1,8 @@
 using Fanscore.Application.DTOs.Player;
+using FanScore.Application.DTOs.Admin;
 using FanScore.Application.DTOs.Player;
 using FanScore.Application.Interfaces.Services;
+using FanScore.Domain.Entities;
 using FanScore.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -215,6 +217,65 @@ namespace FanScore.Infrastructure.Services
                 .ToList();
         }
 
+        public async Task<PlayerDto> CreatePlayerAsync(AdminCreatePlayerDto dto)
+        {
+            await ValidatePlayerAsync(dto);
+
+            var player = new Player
+            {
+                Name = dto.Name.Trim(),
+                Surname = dto.Surname.Trim(),
+                TeamId = dto.TeamId,
+                Age = dto.Age,
+                Position = string.IsNullOrWhiteSpace(dto.Position) ? null : dto.Position.Trim(),
+                PpUrl = string.IsNullOrWhiteSpace(dto.PpUrl) ? null : dto.PpUrl.Trim()
+            };
+
+            _context.Players.Add(player);
+            await _context.SaveChangesAsync();
+
+            return await GetPlayerByIdAsync(player.PlayerId, null)
+                ?? throw new Exception("Oyuncu olusturuldu ama tekrar okunamadi.");
+        }
+
+        public async Task<PlayerDto?> UpdatePlayerAsync(int playerId, AdminUpdatePlayerDto dto)
+        {
+            await ValidatePlayerAsync(dto, playerId);
+
+            var player = await _context.Players.FirstOrDefaultAsync(x => x.PlayerId == playerId);
+            if (player == null)
+                return null;
+
+            player.Name = dto.Name.Trim();
+            player.Surname = dto.Surname.Trim();
+            player.TeamId = dto.TeamId;
+            player.Age = dto.Age;
+            player.Position = string.IsNullOrWhiteSpace(dto.Position) ? null : dto.Position.Trim();
+            player.PpUrl = string.IsNullOrWhiteSpace(dto.PpUrl) ? null : dto.PpUrl.Trim();
+
+            await _context.SaveChangesAsync();
+
+            return await GetPlayerByIdAsync(playerId, null);
+        }
+
+        public async Task<bool> DeletePlayerAsync(int playerId)
+        {
+            var player = await _context.Players
+                .Include(x => x.Ratings)
+                .FirstOrDefaultAsync(x => x.PlayerId == playerId);
+
+            if (player == null)
+                return false;
+
+            if (player.Ratings.Any())
+                _context.Ratings.RemoveRange(player.Ratings);
+
+            _context.Players.Remove(player);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
         private DateTime? GetCurrentPeriodStartDate(string? periodType)
         {
             var now = DateTime.UtcNow;
@@ -229,6 +290,37 @@ namespace FanScore.Infrastructure.Services
                 null => null,
                 _ => null
             };
+        }
+
+        private async Task ValidatePlayerAsync(AdminCreatePlayerDto dto, int? ignoredPlayerId = null)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                throw new Exception("Oyuncu adi zorunlu.");
+
+            if (string.IsNullOrWhiteSpace(dto.Surname))
+                throw new Exception("Oyuncu soyadi zorunlu.");
+
+            if (dto.Age.HasValue && (dto.Age.Value < 10 || dto.Age.Value > 60))
+                throw new Exception("Oyuncu yasi 10 ile 60 arasinda olmali.");
+
+            if (dto.TeamId.HasValue)
+            {
+                var teamExists = await _context.Teams.AnyAsync(x => x.TeamId == dto.TeamId.Value);
+                if (!teamExists)
+                    throw new Exception("Gecersiz takim secildi.");
+            }
+
+            var name = dto.Name.Trim();
+            var surname = dto.Surname.Trim();
+
+            var duplicateExists = await _context.Players.AnyAsync(x =>
+                x.Name == name &&
+                x.Surname == surname &&
+                x.TeamId == dto.TeamId &&
+                (!ignoredPlayerId.HasValue || x.PlayerId != ignoredPlayerId.Value));
+
+            if (duplicateExists)
+                throw new Exception("Bu takimda ayni isimde bir oyuncu zaten var.");
         }
 
         private DateTime? GetPreviousPeriodStartDate(string? periodType)
